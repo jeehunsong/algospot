@@ -1,62 +1,71 @@
-#include <queue>
 #include <iostream>
+#include <queue>
+#include <vector>
 
 using namespace std;
 
-constexpr int INF = 0x7FFFFFFF;
+#define	INF		10000000
+int N;
+vector<pair<int, int > > adj[7];
+char idxToChar[7] = {'a', 'b', 'c', 'd', 'e', 'f', 'g'};
 
-vector<pair<int, int> > adj[7];
-vector<int> dijkstra(int src, int numNode)
+vector<int> dijkstra(int src)
 {
-	vector<int> dist(numNode, INF);
-	dist[src] = 0;
+	vector<int> mindist(7, INF);
+
+	mindist[src] = 0;
 	priority_queue<pair<int, int> > pq;
 	pq.push(make_pair(0, src));
-	while(!pq.empty()) {
-		int cost = -pq.top().first;
-	    int here = pq.top().second;
-	    pq.pop();
-	    if (dist[here] < cost) continue;
-	    for (int i = 0; i < adj[here].size(); ++i)
-	    {
-	    	int there = adj[here][i].first;
-	    	int nextDist = adj[here][i].second + cost;
-	    	cout << "here " << here << " there " << there << endl;
-	    	if(nextDist < dist[there]) {
-	    		cout << "Refresh there " << there << " cost from " << dist[there] << " to " << nextDist << endl;
-	    		dist[there] = nextDist;
-	    		pq.push(make_pair(-nextDist, there));
-	    	}
-	    }
+	while(!pq.empty())
+	{
+		int here = pq.top().second;
+		int dist = -pq.top().first;
+		pq.pop();
+
+		cout << "priority_queue " << idxToChar[here] << ", " << dist << endl;
+
+		if (dist > mindist[here]) continue;
+		for (int i = 0; i < adj[here].size(); ++i)
+		{
+			int there = adj[here][i].first;
+			int theredist = adj[here][i].second + dist;
+			cout << "\tCheck " << idxToChar[there] << ", " << theredist << endl;
+			if (mindist[there] > theredist) {
+				mindist[there] = theredist;
+				pq.push(make_pair(-theredist, there));
+				cout << "\t\tPush " << idxToChar[there] << ", " << theredist << endl;
+			}
+		}
 	}
-	return dist;
+
+	return mindist;
 }
+
 enum alphabet
 {
-	ea = 0, eb, ec, ed, ee, ef, eg
+	ea=0, eb, ec, ed, ee, ef, eg
 };
 
-// Test code
+#define		ADDNODE(src, dst, dist) adj[src].push_back(make_pair(dst, dist)); adj[dst].push_back(make_pair(src, dist))
+
 int main()
 {
-	adj[ea].push_back(make_pair(eb, 5));
-	adj[ea].push_back(make_pair(ec, 1));
+	ADDNODE(ea, eb, 5);
+	ADDNODE(ea, ec, 1);
+
+	ADDNODE(eb, ed, 1);
+	ADDNODE(eb, ef, 3);
+	ADDNODE(eb, eg, 3);
+
+	ADDNODE(ec, ed, 2);
 	
-	adj[eb].push_back(make_pair(ed, 1));
-	adj[eb].push_back(make_pair(eg, 3));
-	adj[eb].push_back(make_pair(ef, 3));
+	ADDNODE(ed, ee, 5);
+	ADDNODE(ed, ef, 3);
 
-	adj[ec].push_back(make_pair(ed, 2));
+	ADDNODE(ef, eg, 2);
 
-	adj[ed].push_back(make_pair(ee, 5));
-	adj[ed].push_back(make_pair(ef, 5));
-
-	adj[ef].push_back(make_pair(eg, 2));
-
-	vector<int> dist = dijkstra(ea, 7);
-
-	for(auto i: dist)
-		cout << i << " ";
-
-	return 0;
+	vector<int> mindist = dijkstra(0);
+	for (int i = 0 ; i < mindist.size() ; ++i) {
+		cout << idxToChar[i] << ": " << mindist[i] << endl;
+	}
 }
